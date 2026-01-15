@@ -16,13 +16,15 @@ Camera camera;
 glm::vec3 lightColor = glm::vec3(1.0f);
 glm::vec3 lightPos = glm::vec3(-180.0f, 100.0f, -200.0f);
 
-glm::vec3 tumbleweedPos = glm::vec3(-300.0f, -15.0f, 0.0f); // start left side
+glm::vec3 tumbleweedPos = glm::vec3(-300.0f, -19.0f, 0.0f);// start left side
 float tumbleweedSpeed = 20.0f; // units per second
 float tumbleweedRotation = 0.0f; // degrees
 //Mesh tumbleweed = loader.loadObj("Resources/Models/sphere.obj", textures2); 
 // textures2 = rock texture, or use a custom tumbleweed texture
 
-
+float getTerrainHeight(float x, float z) { 
+	return -20.0f;
+}
 
 int main()
 {
@@ -165,6 +167,18 @@ int main()
 			tumbleweedPos.x = -300.0f;
 			tumbleweedRotation = 0.0f;
 		}
+
+		float groundY = getTerrainHeight(tumbleweedPos.x, tumbleweedPos.z);
+
+		float tumbleweedScale = 1.0f;
+		float tumbleweedRadius = 1.0f * tumbleweedScale;
+
+		// Lift the tumbleweed so it doesn’t sink visually
+		float extraLift = 17.0f;
+
+		tumbleweedPos.y = groundY + tumbleweedRadius + extraLift;
+
+
 
 		glm::mat4 ProjectionMatrix = glm::perspective(90.0f, window.getWidth() * 1.0f / window.getHeight(), 0.1f, 10000.0f);
 		glm::mat4 ViewMatrix = glm::lookAt(camera.getCameraPosition(), camera.getCameraPosition() + camera.getCameraViewDirection(), camera.getCameraUp());
