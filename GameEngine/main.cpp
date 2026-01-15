@@ -16,7 +16,7 @@ Camera camera;
 glm::vec3 lightColor = glm::vec3(1.0f);
 glm::vec3 lightPos = glm::vec3(-180.0f, 100.0f, -200.0f);
 
-glm::vec3 tumbleweedPos = glm::vec3(-300.0f, -19.0f, 0.0f);// start left side
+glm::vec3 tumbleweedPos = glm::vec3(-300.0f, -19.0f, -250.0f);// start left side
 float tumbleweedSpeed = 20.0f; // units per second
 float tumbleweedRotation = 0.0f; // degrees
 //Mesh tumbleweed = loader.loadObj("Resources/Models/sphere.obj", textures2); 
