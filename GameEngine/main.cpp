@@ -5,7 +5,7 @@
 #include "Model Loading\texture.h"
 #include "Model Loading\meshLoaderObj.h"
 
-void processKeyboardInput ();
+void processKeyboardInput();
 
 float deltaTime = 0.0f;	// time between current frame and last frame
 float lastFrame = 0.0f;
@@ -28,6 +28,24 @@ int main()
 	GLuint tex = loadBMP("Resources/Textures/wood.bmp");
 	GLuint tex2 = loadBMP("Resources/Textures/rock.bmp");
 	GLuint tex3 = loadBMP("Resources/Textures/orange.bmp");
+	// ADDED — ground texture
+	GLuint texGround = loadBMP("Resources/Textures/ground.bmp");
+	glBindTexture(GL_TEXTURE_2D, texGround);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	// ADDED — sky texture
+	GLuint texSky = loadBMP("Resources/Textures/sky.bmp");
+	glBindTexture(GL_TEXTURE_2D, texSky);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	// ADDED — saloon texture
+	GLuint texSaloon = loadBMP("Resources/Textures/saloon_defuse.bmp");
 
 	glEnable(GL_DEPTH_TEST);
 
@@ -54,7 +72,7 @@ int main()
 	vert[2].normals = glm::normalize(glm::cross(vert[3].pos - vert[2].pos, vert[1].pos - vert[2].pos));
 	vert[3].normals = glm::normalize(glm::cross(vert[0].pos - vert[3].pos, vert[2].pos - vert[3].pos));
 
-	std::vector<int> ind = { 0, 1, 3,   
+	std::vector<int> ind = { 0, 1, 3,
 		1, 2, 3 };
 
 	std::vector<Texture> textures;
@@ -72,6 +90,23 @@ int main()
 	textures3[0].id = tex3;
 	textures3[0].type = "texture_diffuse";
 
+	// ADDED — saloon textures
+	std::vector<Texture> saloonTextures;
+	saloonTextures.push_back(Texture());
+	saloonTextures[0].id = texSaloon;
+	saloonTextures[0].type = "texture_diffuse";
+
+	// ADDED — ground textures
+	std::vector<Texture> groundTextures;
+	groundTextures.push_back(Texture());
+	groundTextures[0].id = texGround;
+	groundTextures[0].type = "texture_diffuse";
+
+	// ADDED — sky textures
+	std::vector<Texture> skyTextures;
+	skyTextures.push_back(Texture());
+	skyTextures[0].id = texSky;
+	skyTextures[0].type = "texture_diffuse";
 
 	Mesh mesh(vert, ind, textures3);
 
@@ -80,7 +115,14 @@ int main()
 	MeshLoaderObj loader;
 	Mesh sun = loader.loadObj("Resources/Models/sphere.obj");
 	Mesh box = loader.loadObj("Resources/Models/cube.obj", textures);
-	Mesh plane = loader.loadObj("Resources/Models/plane.obj", textures3);
+	// CHANGED — plane now uses ground texture instead of orange
+	Mesh plane = loader.loadObj("Resources/Models/plane.obj", groundTextures);
+
+	// ADDED — sky plane
+	Mesh skyPlane = loader.loadObj("Resources/Models/plane.obj", skyTextures);
+
+	// ADDED — saloon model
+	Mesh saloon = loader.loadObj("Resources/Models/saloon.obj", saloonTextures);
 
 	//check if we close the window or press the escape button
 	while (!window.isPressed(GLFW_KEY_ESCAPE) &&
@@ -98,7 +140,7 @@ int main()
 		{
 			std::cout << "Pressing mouse button" << std::endl;
 		}
-		 //// Code for the light ////
+		//// Code for the light ////
 
 		sunShader.use();
 
@@ -138,13 +180,36 @@ int main()
 
 		///// Test plane Obj file //////
 
+		// CHANGED — ground is now scaled desert
 		ModelMatrix = glm::mat4(1.0);
 		ModelMatrix = glm::translate(ModelMatrix, glm::vec3(0.0f, -20.0f, 0.0f));
+		ModelMatrix = glm::scale(ModelMatrix, glm::vec3(500.0f, 1.0f, 500.0f));
 		MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
 		glUniformMatrix4fv(MatrixID2, 1, GL_FALSE, &MVP[0][0]);
 		glUniformMatrix4fv(ModelMatrixID, 1, GL_FALSE, &ModelMatrix[0][0]);
 
 		plane.draw(shader);
+
+		// ADDED — draw sky
+		ModelMatrix = glm::mat4(1.0);
+		ModelMatrix = glm::translate(ModelMatrix, glm::vec3(0.0f, 100.0f, -600.0f));
+		ModelMatrix = glm::scale(ModelMatrix, glm::vec3(800.0f, 1.0f, 400.0f));
+		MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
+		glUniformMatrix4fv(MatrixID2, 1, GL_FALSE, &MVP[0][0]);
+		glUniformMatrix4fv(ModelMatrixID, 1, GL_FALSE, &ModelMatrix[0][0]);
+
+		skyPlane.draw(shader);
+
+		// ADDED — draw saloon
+		ModelMatrix = glm::mat4(1.0);
+		ModelMatrix = glm::translate(ModelMatrix, glm::vec3(0.0f, -20.0f, -80.0f));
+		MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
+		glUniformMatrix4fv(MatrixID2, 1, GL_FALSE, &MVP[0][0]);
+		glUniformMatrix4fv(ModelMatrixID, 1, GL_FALSE, &ModelMatrix[0][0]);
+
+		saloon.draw(shader);
+
+
 
 		window.update();
 	}

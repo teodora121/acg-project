@@ -1,0 +1,62 @@
+# ======================
+# Visual Studio
+# ======================
+.vs/
+.vs/*
+*.user
+*.userosscache
+*.suo
+*.VC.db
+*.VC.opendb
+
+# Visual Studio cache files
+ipch/
+.vscode/
+
+# ======================
+# Build folders
+# ======================
+Debug/
+Release/
+x64/
+x86/
+build/
+out/
+
+# ======================
+# Object / binary files
+# ======================
+*.obj
+*.o
+*.lo
+*.la
+*.al
+*.exe
+*.dll
+*.so
+*.dylib
+*.lib
+*.a
+*.pdb
+*.idb
+
+# ======================
+# OpenGL / C++ temp files
+# ======================
+*.log
+*.tlog
+*.ilk
+
+# ======================
+# CMake (if used)
+# ======================
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+
+# ======================
+# OS files
+# ======================
+Thumbs.db
+.DS_Store
