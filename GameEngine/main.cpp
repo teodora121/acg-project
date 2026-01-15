@@ -16,6 +16,14 @@ Camera camera;
 glm::vec3 lightColor = glm::vec3(1.0f);
 glm::vec3 lightPos = glm::vec3(-180.0f, 100.0f, -200.0f);
 
+glm::vec3 tumbleweedPos = glm::vec3(-300.0f, -15.0f, 0.0f); // start left side
+float tumbleweedSpeed = 20.0f; // units per second
+float tumbleweedRotation = 0.0f; // degrees
+//Mesh tumbleweed = loader.loadObj("Resources/Models/sphere.obj", textures2); 
+// textures2 = rock texture, or use a custom tumbleweed texture
+
+
+
 int main()
 {
 	glClearColor(0.2f, 0.8f, 1.0f, 1.0f);
@@ -114,6 +122,7 @@ int main()
 	// we can add here our textures :)
 	MeshLoaderObj loader;
 	Mesh sun = loader.loadObj("Resources/Models/sphere.obj");
+	Mesh tumbleweed = loader.loadObj("Resources/Models/sphere.obj", textures2);
 	Mesh box = loader.loadObj("Resources/Models/cube.obj", textures);
 	// CHANGED — plane now uses ground texture instead of orange
 	Mesh plane = loader.loadObj("Resources/Models/plane.obj", groundTextures);
@@ -143,6 +152,19 @@ int main()
 		//// Code for the light ////
 
 		sunShader.use();
+
+		// Move tumbleweed left ? right
+		tumbleweedPos.x += tumbleweedSpeed * deltaTime;
+
+		// Rotate it as it rolls
+		tumbleweedRotation += 200.0f * deltaTime; // adjust for faster/slower spin
+
+		// Reset when off-screen
+		if (tumbleweedPos.x > 300.0f)
+		{
+			tumbleweedPos.x = -300.0f;
+			tumbleweedRotation = 0.0f;
+		}
 
 		glm::mat4 ProjectionMatrix = glm::perspective(90.0f, window.getWidth() * 1.0f / window.getHeight(), 0.1f, 10000.0f);
 		glm::mat4 ViewMatrix = glm::lookAt(camera.getCameraPosition(), camera.getCameraPosition() + camera.getCameraViewDirection(), camera.getCameraUp());
@@ -208,6 +230,21 @@ int main()
 		glUniformMatrix4fv(ModelMatrixID, 1, GL_FALSE, &ModelMatrix[0][0]);
 
 		saloon.draw(shader);
+
+		// ADDED - draw tumbleweed
+		// Draw tumbleweed
+		ModelMatrix = glm::mat4(1.0f);
+		ModelMatrix = glm::translate(ModelMatrix, tumbleweedPos);
+		ModelMatrix = glm::scale(ModelMatrix, glm::vec3(1.0f)); // size of sphere
+		ModelMatrix = glm::rotate(ModelMatrix, glm::radians(tumbleweedRotation), glm::vec3(0, 0, 1)); // roll around Z axis
+
+		MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
+
+		glUniformMatrix4fv(MatrixID2, 1, GL_FALSE, &MVP[0][0]);
+		glUniformMatrix4fv(ModelMatrixID, 1, GL_FALSE, &ModelMatrix[0][0]);
+
+		tumbleweed.draw(shader);
+
 
 
 
