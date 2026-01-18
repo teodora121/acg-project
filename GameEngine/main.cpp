@@ -65,6 +65,13 @@ int main()
 
 	glEnable(GL_DEPTH_TEST);
 
+	glm::mat4 ProjectionMatrix;
+	glm::mat4 ViewMatrix;
+
+	GLuint MatrixID;
+	GLuint MatrixID2;
+	GLuint ModelMatrixID;
+
 	//Test custom mesh loading
 	std::vector<Vertex> vert;
 	vert.push_back(Vertex());
@@ -183,10 +190,8 @@ int main()
 		else
 		{
 			// Third person: camera is behind the player, look at player
-			ViewMatrix = glm::lookAt(camera.cameraPosition,
-				playerPosition + glm::vec3(0.0f, 2.0f, 0.0f), // look slightly above player's origin
-				camera.getCameraUp());
-		}
+			ViewMatrix = glm::lookAt(camera.getCameraPosition(), camera.getCameraPosition() + camera.getCameraViewDirection(), camera.getCameraUp());
+
 
 		//test mouse input
 		if (window.isMousePressed(GLFW_MOUSE_BUTTON_LEFT))
@@ -222,10 +227,18 @@ int main()
 
 
 
-		glm::mat4 ProjectionMatrix = glm::perspective(90.0f, window.getWidth() * 1.0f / window.getHeight(), 0.1f, 10000.0f);
-		glm::mat4 ViewMatrix = glm::lookAt(camera.getCameraPosition(), camera.getCameraPosition() + camera.getCameraViewDirection(), camera.getCameraUp());
+		ProjectionMatrix = glm::perspective(glm::radians(90.0f),
+			window.getWidth() * 1.0f / window.getHeight(),
+			0.1f, 10000.0f);
 
-		GLuint MatrixID = glGetUniformLocation(sunShader.getId(), "MVP");
+		ViewMatrix = glm::lookAt(camera.getCameraPosition(),
+			camera.getCameraPosition() + camera.getCameraViewDirection(),
+			camera.getCameraUp());
+
+		MatrixID = glGetUniformLocation(sunShader.getId(), "MVP");
+		MatrixID2 = glGetUniformLocation(shader.getId(), "MVP");
+		ModelMatrixID = glGetUniformLocation(shader.getId(), "model");
+
 
 		//Test for one Obj loading = light source
 
@@ -308,8 +321,8 @@ int main()
 	}
 }
 
-void processKeyboardInput()
-{
+void processKeyboardInput();
+ {
 	float cameraSpeed = 30 * deltaTime;
 
 	// translation — MOVE PLAYER

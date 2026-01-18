@@ -1,24 +1,12 @@
 ﻿  main.cpp
 C:\Users\Teodora\OneDrive\Documents\GitHub\acg-project\GameEngine\main.cpp(149,22): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
 C:\Users\Teodora\OneDrive\Documents\GitHub\acg-project\GameEngine\main.cpp(159,23): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-C:\Users\Teodora\OneDrive\Documents\GitHub\acg-project\GameEngine\main.cpp(186,35): error C2248: 'Camera::cameraPosition': cannot access private member declared in class 'Camera'
-      C:\Users\Teodora\OneDrive\Documents\GitHub\acg-project\GameEngine\Camera\camera.h(12,13):
-      see declaration of 'Camera::cameraPosition'
-      C:\Users\Teodora\OneDrive\Documents\GitHub\acg-project\GameEngine\Camera\camera.h(9,7):
-      see declaration of 'Camera'
+C:\Users\Teodora\OneDrive\Documents\GitHub\acg-project\GameEngine\main.cpp(257,10): error C2086: 'GLuint MatrixID2': redefinition
+      C:\Users\Teodora\OneDrive\Documents\GitHub\acg-project\GameEngine\main.cpp(226,10):
+      see declaration of 'MatrixID2'
   
-C:\Users\Teodora\OneDrive\Documents\GitHub\acg-project\GameEngine\main.cpp(226,13): error C2374: 'ViewMatrix': redefinition; multiple initialization
-      C:\Users\Teodora\OneDrive\Documents\GitHub\acg-project\GameEngine\main.cpp(174,13):
-      see declaration of 'ViewMatrix'
+C:\Users\Teodora\OneDrive\Documents\GitHub\acg-project\GameEngine\main.cpp(258,10): error C2086: 'GLuint ModelMatrixID': redefinition
+      C:\Users\Teodora\OneDrive\Documents\GitHub\acg-project\GameEngine\main.cpp(227,10):
+      see declaration of 'ModelMatrixID'
   
-C:\Users\Teodora\OneDrive\Documents\GitHub\acg-project\GameEngine\main.cpp(226,13): error C2086: 'glm::mat4 ViewMatrix': redefinition
-      C:\Users\Teodora\OneDrive\Documents\GitHub\acg-project\GameEngine\main.cpp(174,13):
-      see declaration of 'ViewMatrix'
-  
-C:\Users\Teodora\OneDrive\Documents\GitHub\acg-project\GameEngine\main.cpp(311,6): error C2601: 'processKeyboardInput': local function definitions are illegal
-      C:\Users\Teodora\OneDrive\Documents\GitHub\acg-project\GameEngine\main.cpp(36,1):
-      this line contains a '{' which has not yet been matched
-  
-C:\Users\Teodora\OneDrive\Documents\GitHub\acg-project\GameEngine\main.cpp(36,1): error C1075: '{': no matching token found
-  mesh.cpp
-  Generating Code...
+C:\Users\Teodora\OneDrive\Documents\GitHub\acg-project\GameEngine\main.cpp(147,2): error C1075: '{': no matching token found
