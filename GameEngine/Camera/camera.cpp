@@ -26,6 +26,9 @@ Camera::Camera(glm::vec3 cameraPosition, glm::vec3 cameraViewDirection, glm::vec
 	this->cameraViewDirection = cameraViewDirection;
 	this->cameraUp = cameraUp;
 	this->cameraRight = glm::cross(cameraViewDirection, cameraUp);
+	this->rotationOx = 0.0f;
+	this->rotationOy = -90.0f;
+
 }
 
 Camera::~Camera()
@@ -44,13 +47,14 @@ void Camera::keyboardMoveBack(float cameraSpeed)
 
 void Camera::keyboardMoveLeft(float cameraSpeed)
 {
-	//task
+	cameraPosition -= cameraRight * cameraSpeed;
 }
 
 void Camera::keyboardMoveRight(float cameraSpeed)
 {
-	//task
+	cameraPosition += cameraRight * cameraSpeed;
 }
+
 
 void Camera::keyboardMoveUp(float cameraSpeed)
 {
@@ -69,10 +73,18 @@ void Camera::rotateOx(float angle)
 	cameraRight = glm::cross(cameraViewDirection, cameraUp);
 }
 
-void Camera::rotateOy (float angle)
+void Camera::rotateOy(float angle)
 {
-	//task
+	cameraViewDirection = glm::normalize(
+		glm::vec3(
+			glm::rotate(glm::mat4(1.0f), angle, cameraUp) *
+			glm::vec4(cameraViewDirection, 1.0f)
+		)
+	);
+
+	cameraRight = glm::normalize(glm::cross(cameraViewDirection, cameraUp));
 }
+
 
 glm::mat4 Camera::getViewMatrix()
 {

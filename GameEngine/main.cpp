@@ -13,6 +13,12 @@ float lastFrame = 0.0f;
 Window window("Game Engine", 800, 800);
 Camera camera;
 
+glm::vec3 playerPosition = glm::vec3(0.0f, 0.0f, 5.0f); // player start position
+
+bool firstPerson = true;              // current camera mode
+float thirdPersonDistance = 10.0f;    // distance behind player in third-person view
+
+
 glm::vec3 lightColor = glm::vec3(1.0f);
 glm::vec3 lightPos = glm::vec3(-180.0f, 100.0f, -200.0f);
 
@@ -145,6 +151,42 @@ int main()
 		lastFrame = currentFrame;
 
 		processKeyboardInput();
+		//first pers camera
+		while (!window.isPressed(GLFW_KEY_ESCAPE) &&
+			glfwWindowShouldClose(window.getWindow()) == 0)
+		{
+			window.clear();
+			float currentFrame = glfwGetTime();
+			deltaTime = currentFrame - lastFrame;
+			lastFrame = currentFrame;
+
+			processKeyboardInput();
+			if (firstPerson)
+			{
+				camera.setCameraPosition(playerPosition);
+			}
+			else
+			{
+				camera.setCameraPosition(playerPosition - camera.getCameraViewDirection() * thirdPersonDistance);
+			}
+
+
+		glm::mat4 ViewMatrix;
+
+		if (firstPerson)
+		{
+			// First person: camera looks where player is facing
+			ViewMatrix = glm::lookAt(camera.getCameraPosition(),
+				camera.getCameraPosition() + camera.getCameraViewDirection(),
+				camera.getCameraUp());
+		}
+		else
+		{
+			// Third person: camera is behind the player, look at player
+			ViewMatrix = glm::lookAt(camera.cameraPosition,
+				playerPosition + glm::vec3(0.0f, 2.0f, 0.0f), // look slightly above player's origin
+				camera.getCameraUp());
+		}
 
 		//test mouse input
 		if (window.isMousePressed(GLFW_MOUSE_BUTTON_LEFT))
@@ -270,19 +312,18 @@ void processKeyboardInput()
 {
 	float cameraSpeed = 30 * deltaTime;
 
-	//translation
+	// translation — MOVE PLAYER
 	if (window.isPressed(GLFW_KEY_W))
-		camera.keyboardMoveFront(cameraSpeed);
+		playerPosition += camera.getCameraViewDirection() * cameraSpeed;
 	if (window.isPressed(GLFW_KEY_S))
-		camera.keyboardMoveBack(cameraSpeed);
+		playerPosition -= camera.getCameraViewDirection() * cameraSpeed;
 	if (window.isPressed(GLFW_KEY_A))
-		camera.keyboardMoveLeft(cameraSpeed);
+		playerPosition -= glm::normalize(glm::cross(
+			camera.getCameraViewDirection(), camera.getCameraUp())) * cameraSpeed;
 	if (window.isPressed(GLFW_KEY_D))
-		camera.keyboardMoveRight(cameraSpeed);
-	if (window.isPressed(GLFW_KEY_R))
-		camera.keyboardMoveUp(cameraSpeed);
-	if (window.isPressed(GLFW_KEY_F))
-		camera.keyboardMoveDown(cameraSpeed);
+		playerPosition += glm::normalize(glm::cross(
+			camera.getCameraViewDirection(), camera.getCameraUp())) * cameraSpeed;
+
 
 	//rotation
 	if (window.isPressed(GLFW_KEY_LEFT))

@@ -62,6 +62,8 @@ struct Texture
 {
 	unsigned int id;
 	std::string type;
+	Texture() : id(0), type("") {}  // default constructor
+	Texture(unsigned int _id, std::string _type) : id(_id), type(_type) {}
 };
 
 class Mesh
