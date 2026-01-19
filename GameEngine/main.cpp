@@ -1,4 +1,7 @@
-﻿#include "Graphics\window.h"
+﻿#include "imgui-master/imgui.h"
+#include "imgui-master/backends/imgui_impl_glfw.h"
+#include "imgui-master/backends/imgui_impl_opengl3.h"
+#include "Graphics\window.h"
 #include "Camera\camera.h"
 #include "Shaders\shader.h"
 #include "Model Loading\mesh.h"
@@ -62,6 +65,16 @@ int main()
 	GLuint texSaloon = loadBMP("Resources/Textures/saloon_defuse.bmp");
 
 	glEnable(GL_DEPTH_TEST);
+
+// INIT IMGUI
+
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO();
+	ImGui::StyleColorsDark();
+
+	ImGui_ImplGlfw_InitForOpenGL(window.getWindow(), true);
+	ImGui_ImplOpenGL3_Init("#version 400");
 
 	
 
@@ -146,14 +159,21 @@ int main()
 		glfwWindowShouldClose(window.getWindow()) == 0)
 	{
 		window.clear();
+	
+// START IMGUI FRAME
+
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
+
 		float currentFrame = glfwGetTime();
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
 
 		processKeyboardInput();
-		// -------------------------
+	
 // UPDATE DAY–NIGHT CYCLE
-// -------------------------
+
 		timeOfDay += daySpeed * deltaTime;
 
 		// keep value between 0 and 2π
@@ -291,13 +311,50 @@ int main()
 				glUniformMatrix4fv(ModelMatrixID, 1, GL_FALSE, &ModelMatrix[0][0]);
 
 				tumbleweed.draw(shader);
+			
+// GUI WINDOW
+
+				ImGui::Begin("Wild West Controls");
+
+				static bool skyBlue = true;
+
+				if (ImGui::Button("Toggle Sky Color"))
+				{
+					skyBlue = !skyBlue;
+
+					if (skyBlue)
+						glClearColor(0.2f, 0.8f, 1.0f, 1.0f);   // day sky
+					else
+						glClearColor(0.0f, 0.0f, 0.1f, 1.0f);   // night sky
+				}
+
+				ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
+
+				ImGui::End();
+
+				
+				// RENDER IMGUI
+				
+				ImGui::Render();
+				ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
 
 
 
 				window.update();
-			}
-		}
+	}
+
+	
+	// SHUTDOWN IMGUI
+
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplGlfw_Shutdown();
+	ImGui::DestroyContext();
+
+	return 0;
+}
+
+
 void processKeyboardInput()
 {
 	float cameraSpeed = 30.0f * deltaTime;
