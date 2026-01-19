@@ -10,10 +10,16 @@ uniform sampler2D texture1;
 uniform vec3 lightColor;
 uniform vec3 lightPos;
 uniform vec3 viewPos;
+uniform vec3 skyTint;
 
 void main()
 {
 	//TO DO: Add illumination from Lab 9
+vec4 texColor = texture(texture1, textureCoord);
 
-	fragColor = texture(texture1, textureCoord);
+// apply tint only to sky (optional but recommended)
+texColor.rgb *= skyTint;
+
+fragColor = texColor;
+
 }
