@@ -25,8 +25,8 @@ glm::vec3 lightPos = glm::vec3(-180.0f, 100.0f, -200.0f);
 glm::vec3 tumbleweedPos = glm::vec3(-300.0f, -19.0f, -250.0f);// start left side
 float tumbleweedSpeed = 20.0f; // units per second
 float tumbleweedRotation = 0.0f; // degrees
-glm::vec3 moonPos = glm::vec3(0.0f, 200.0f, -300.0f);
-float moonAngle = 0.0f;
+glm::vec3 airplanePos = glm::vec3(0.0f, 200.0f, -300.0f);
+float airplaneAngle = 0.0f;
 //Mesh tumbleweed = loader.loadObj("Resources/Models/sphere.obj", textures2); 
 // textures2 = rock texture, or use a custom tumbleweed texture
 float timeOfDay = 0.0f; // increases every frame 
@@ -47,7 +47,7 @@ int main()
 	GLuint tex = loadBMP("Resources/Textures/wood.bmp");
 	GLuint tex2 = loadBMP("Resources/Textures/rock.bmp");
 	GLuint tex3 = loadBMP("Resources/Textures/orange.bmp");
-	GLuint texMoon = loadBMP("Resources/Textures/moonnou.bmp");
+	GLuint texairplane = loadBMP("Resources/Textures/moonnou.bmp");
 	// ADDED — ground texture
 	GLuint texGround = loadBMP("Resources/Textures/ground.bmp");
 	glBindTexture(GL_TEXTURE_2D, texGround);
@@ -122,10 +122,10 @@ int main()
 	textures3[0].id = tex3;
 	textures3[0].type = "texture_diffuse";
 
-	std::vector<Texture> moonTextures;
-	moonTextures.push_back(Texture());
-	moonTextures[0].id = texMoon;
-	moonTextures[0].type = "texture_diffuse";
+	std::vector<Texture> airplaneTextures;
+	airplaneTextures.push_back(Texture());
+	airplaneTextures[0].id = texairplane;
+	airplaneTextures[0].type = "texture_diffuse";
 
 	// ADDED — saloon textures
 	std::vector<Texture> saloonTextures;
@@ -151,7 +151,7 @@ int main()
 	// we can add here our textures :)
 	MeshLoaderObj loader;
 	Mesh sun = loader.loadObj("Resources/Models/sphere.obj");
-	Mesh moon = loader.loadObj("Resources/Models/sphere.obj", moonTextures);
+	Mesh airplane = loader.loadObj("Resources/Models/airplane.obj", airplaneTextures);
 	Mesh tumbleweed = loader.loadObj("Resources/Models/sphere.obj", textures2);
 	Mesh box = loader.loadObj("Resources/Models/cube.obj", textures);
 	// CHANGED — plane now uses ground texture instead of orange
@@ -192,13 +192,13 @@ int main()
 		// brightness goes from 0 (night) to 1 (day)
 		float brightness = (sin(timeOfDay) + 1.0f) / 2.0f;
 
-		// MOON ANIMATION
-		moonAngle += 0.1f * deltaTime;
+		// airplane ANIMATION
+		airplaneAngle += 0.3f * deltaTime;
 
-		float moonRadius = 400.0f; 
-		moonPos.x = cos(moonAngle) * moonRadius;
-		moonPos.y = 250.0f + sin(moonAngle) * 80.0f; // behind the saloon, in the sky
-		moonPos.z = -300.0f;
+		float airplaneRadius = 500.0f; 
+		airplanePos.x = cos(airplaneAngle) * airplaneRadius;
+		airplanePos.z = sin(airplaneAngle) * airplaneRadius;
+		airplanePos.y = 200.0f;
 
 		// update light color (warm day → blue night)
 		lightColor = glm::vec3(
@@ -263,15 +263,15 @@ int main()
 				GLuint ModelMatrixID = glGetUniformLocation(shader.getId(), "model");
 
 				ModelMatrix = glm::mat4(1.0f);
-				ModelMatrix = glm::translate(ModelMatrix, moonPos);
-				ModelMatrix = glm::scale(ModelMatrix, glm::vec3(8.0f));
-
+				ModelMatrix = glm::translate(ModelMatrix, airplanePos);
+				ModelMatrix = glm::scale(ModelMatrix, glm::vec3(6.0f));
+				
 				MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
 
 				glUniformMatrix4fv(MatrixID2, 1, GL_FALSE, &MVP[0][0]);
 				glUniformMatrix4fv(ModelMatrixID, 1, GL_FALSE, &ModelMatrix[0][0]);
-
-				moon.draw(shader);
+				
+				airplane.draw(shader);
 				
 
 				///// Test Obj files for box ////
