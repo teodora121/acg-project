@@ -33,7 +33,7 @@ bool hasCoin = false;
 int ammo = 0;
 // ===== AMMO BUILDING TASK (TASK 3) =====
 glm::vec3 ammoBuildingPos = glm::vec3(-170.0f, -20.0f, -80.0f);
-float ammoBuildingRadius = 25.0f;
+float ammoBuildingRadius = 60.0f;
 bool ammoCollected = false;
 
 
@@ -726,7 +726,11 @@ int main()
 				ImGui::Begin("Wild West Controls");
 				ImGui::Separator();
 				ImGui::Text("Current Objective:");
-				ImGui::Text("%s", taskTexts[currentTask]);
+				if (currentTask < 3)
+					ImGui::Text("%s", taskTexts[currentTask]);
+				else
+					ImGui::Text("All tasks complete!");
+
 				ImGui::Separator();
 				// ===== TASK 3 GUI PROMPT =====
 				if (currentTask == 2 && insideAmmoBuilding && !ammoCollected)
