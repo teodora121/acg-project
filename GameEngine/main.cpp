@@ -7,6 +7,8 @@
 #include "Model Loading\mesh.h"
 #include "Model Loading\texture.h"
 #include "Model Loading\meshLoaderObj.h"
+#include "SceneObjects.h"
+
 
 void processKeyboardInput();
 
@@ -156,6 +158,18 @@ int main()
 	Mesh box = loader.loadObj("Resources/Models/cube.obj", textures);
 	// CHANGED — plane now uses ground texture instead of orange
 	Mesh plane = loader.loadObj("Resources/Models/plane.obj", groundTextures);
+
+	// Building 1
+	Mesh building1 = loader.loadObj(
+		"assets/models/building1/casa.obj",
+		saloonTextures   // reuse saloon texture for now
+	);
+
+	// Building 2
+	Mesh building2 = loader.loadObj(
+		"assets/models/building2/casa2.obj",
+		saloonTextures
+	);
 
 	// ADDED — sky plane
 	Mesh skyPlane = loader.loadObj("Resources/Models/plane.obj", skyTextures);
@@ -327,6 +341,24 @@ int main()
 				glUniformMatrix4fv(ModelMatrixID, 1, GL_FALSE, &ModelMatrix[0][0]);
 
 				saloon.draw(shader);
+
+				// ===== draw building 1 =====
+				ModelMatrix = glm::mat4(1.0f);
+				ModelMatrix = glm::translate(ModelMatrix, glm::vec3(80.0f, -20.0f, -100.0f));
+				ModelMatrix = glm::scale(ModelMatrix, glm::vec3(8.0f));
+				MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
+				glUniformMatrix4fv(MatrixID2, 1, GL_FALSE, &MVP[0][0]);
+				glUniformMatrix4fv(ModelMatrixID, 1, GL_FALSE, &ModelMatrix[0][0]);
+				building1.draw(shader);
+
+				// ===== draw building 2 =====
+				ModelMatrix = glm::mat4(1.0f);
+				ModelMatrix = glm::translate(ModelMatrix, glm::vec3(-100.0f, -20.0f, -120.0f));
+				ModelMatrix = glm::scale(ModelMatrix, glm::vec3(10.0f));
+				MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
+				glUniformMatrix4fv(MatrixID2, 1, GL_FALSE, &MVP[0][0]);
+				glUniformMatrix4fv(ModelMatrixID, 1, GL_FALSE, &ModelMatrix[0][0]);
+				building2.draw(shader);
 
 				// ADDED - draw tumbleweed
 				// Draw tumbleweed
