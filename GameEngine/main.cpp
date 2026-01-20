@@ -28,6 +28,18 @@ float tumbleweedRotation = 0.0f; // degrees
 bool hasgun = false;
 glm::vec3 gunWorldPos = glm::vec3(-80.0f, -15.0f, -80.0f);
 
+int ammo = 7;
+
+struct Bullet
+{
+	glm::vec3 position;
+	glm::vec3 direction;
+	float speed;
+};
+
+std::vector<Bullet> bullets;
+
+
 
 glm::vec3 posterPos = glm::vec3(0.0f, -5.0f, -78.0f);
 
@@ -253,6 +265,34 @@ int main()
 				camera.setCameraPosition(camPos);
 			}
 		}
+
+		// ===== SHOOT BULLET =====
+		if (hasgun && ammo > 0 && window.isMousePressed(GLFW_MOUSE_BUTTON_LEFT))
+		{
+			Bullet b;
+			b.position = camera.getCameraPosition();
+			b.direction = glm::normalize(camera.getCameraViewDirection());
+			b.speed = 300.0f;
+
+			bullets.push_back(b);
+			ammo--;
+		}
+
+
+		
+		// ===== UPDATE BULLETS =====
+		for (int i = 0; i < bullets.size(); i++)
+		{
+			bullets[i].position += bullets[i].direction * bullets[i].speed * deltaTime;
+
+			// remove bullet if too far
+			if (glm::length(bullets[i].position - camera.getCameraPosition()) > 500.0f)
+			{
+				bullets.erase(bullets.begin() + i);
+				i--;
+			}
+		}
+
 	
 // UPDATE DAY–NIGHT CYCLE
 
@@ -483,6 +523,21 @@ int main()
 
 				tumbleweed.draw(shader);
 
+				// ===== DRAW BULLETS =====
+				for (auto& b : bullets)
+				{
+					glm::mat4 ModelMatrix = glm::mat4(1.0f);
+					ModelMatrix = glm::translate(ModelMatrix, b.position);
+					ModelMatrix = glm::scale(ModelMatrix, glm::vec3(0.5f));
+
+					glm::mat4 MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
+					glUniformMatrix4fv(MatrixID2, 1, GL_FALSE, &MVP[0][0]);
+					glUniformMatrix4fv(ModelMatrixID, 1, GL_FALSE, &ModelMatrix[0][0]);
+
+					box.draw(shader); // reuse cube as bullet
+				}
+
+
 				// added - draw cacti
 				for (auto& pos : cactusPositions)
 				{
@@ -544,6 +599,8 @@ int main()
 				}
 
 				ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
+				ImGui::Text("Ammo: %d / 7", ammo);
+
 				if (nearPoster)
 				{
 					ImGui::Text("Press R to read the poster");
