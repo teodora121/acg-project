@@ -25,6 +25,9 @@ glm::vec3 tumbleweedPos = glm::vec3(-300.0f, -19.0f, -250.0f);// start left side
 float tumbleweedSpeed = 20.0f; // units per second
 float tumbleweedRotation = 0.0f; // degrees
 
+glm::vec3 posterPos = glm::vec3(0.0f, -5.0f, -78.0f);
+
+
 std::vector<glm::vec3> cactusPositions = {
 	glm::vec3(120.0f, -5.0f, -150.0f),
 	glm::vec3(0.0f,   -5.0f, -50.0f),
@@ -56,6 +59,8 @@ int main()
 	GLuint tex2 = loadBMP("Resources/Textures/rock.bmp");
 	GLuint tex3 = loadBMP("Resources/Textures/orange.bmp");
 	GLuint texairplane = loadBMP("Resources/Textures/moonnou.bmp");
+	GLuint texPoster = loadBMP("Resources/Textures/wanted.bmp");
+
 
 
 	// ADDED — ground texture
@@ -158,6 +163,13 @@ int main()
 	skyTextures[0].id = texSky;
 	skyTextures[0].type = "texture_diffuse";
 
+	//poster
+	std::vector<Texture> posterTextures;
+	posterTextures.push_back(Texture());
+	posterTextures[0].id = texPoster;
+	posterTextures[0].type = "texture_diffuse";
+
+
 	Mesh mesh(vert, ind, textures3);
 
 	// Create Obj files - easier :)
@@ -174,6 +186,8 @@ int main()
 	Mesh box = loader.loadObj("Resources/Models/cube.obj", textures);
 	// CHANGED — plane now uses ground texture instead of orange
 	Mesh plane = loader.loadObj("Resources/Models/plane.obj", groundTextures);
+	Mesh poster = loader.loadObj("Resources/Models/plane.obj", posterTextures);
+
 
 	// Building 1
 	Mesh building1 = loader.loadObj(
@@ -210,6 +224,9 @@ int main()
 		lastFrame = currentFrame;
 
 		processKeyboardInput();
+		float distToPoster = glm::distance(camera.getCameraPosition(), posterPos);
+		bool nearPoster = distToPoster < 15.0f;
+
 	
 // UPDATE DAY–NIGHT CYCLE
 
@@ -358,6 +375,30 @@ int main()
 
 				saloon.draw(shader);
 
+				// ===== draw wanted poster =====
+				ModelMatrix = glm::mat4(1.0f);
+
+				// Position on wall
+				ModelMatrix = glm::translate(ModelMatrix, glm::vec3(0.0f, -5.0f, -78.5f));
+
+				// Make it small
+				ModelMatrix = glm::scale(ModelMatrix, glm::vec3(3.0f, 4.0f, 1.0f));
+
+				// FIX: rotate plane upright
+				ModelMatrix = glm::rotate(ModelMatrix, glm::radians(-90.0f), glm::vec3(1, 0, 0));
+
+				// Face camera
+				ModelMatrix = glm::rotate(ModelMatrix, glm::radians(180.0f), glm::vec3(0, 1, 0));
+
+				MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
+
+				glUniformMatrix4fv(MatrixID2, 1, GL_FALSE, &MVP[0][0]);
+				glUniformMatrix4fv(ModelMatrixID, 1, GL_FALSE, &ModelMatrix[0][0]);
+
+				poster.draw(shader);
+
+
+
 				// ===== draw building 1 =====
 				ModelMatrix = glm::mat4(1.0f);
 				ModelMatrix = glm::translate(
@@ -432,6 +473,24 @@ int main()
 				}
 
 				ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
+				if (nearPoster)
+				{
+					ImGui::Text("Press R to read the poster");
+
+					if (window.isPressed(GLFW_KEY_R))
+					{
+						ImGui::OpenPopup("PosterPopup");
+					}
+				}
+
+				if (ImGui::BeginPopup("PosterPopup"))
+				{
+					ImGui::Text("WANTED: Dead or Alive!");
+					ImGui::Text("Reward: $5000");
+					ImGui::EndPopup();
+				}
+
+
 
 				ImGui::End();
 
