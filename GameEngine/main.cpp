@@ -30,11 +30,15 @@ glm::vec3 gunWorldPos = glm::vec3(-80.0f, -15.0f, -80.0f);
 
 int ammo = 7;
 
+glm::vec3 windmillPos = glm::vec3(320.0f, -20.0f, -120.0f); 
+float windmillRotation = 0.0f;
+
+
 struct Bullet
 {
 	glm::vec3 position;
 	glm::vec3 direction;
-	float speed;
+	float speed = 300.0f;
 };
 
 std::vector<Bullet> bullets;
@@ -103,6 +107,10 @@ int main()
 	// ADDED — saloon texture
 	GLuint texSaloon = loadBMP("Resources/Textures/saloon_defuse.bmp");
 
+	// WINDMILL TEXTURE
+	//GLuint texWindmill = loadBMP("assets/models/windmill/.bmp");
+
+
 	glEnable(GL_DEPTH_TEST);
 
 // INIT IMGUI
@@ -169,6 +177,13 @@ int main()
 	saloonTextures[0].id = texSaloon;
 	saloonTextures[0].type = "texture_diffuse";
 
+	// WINDMILL TEXTURES
+	std::vector<Texture> windmillTextures;
+	windmillTextures.push_back(Texture());
+	//windmillTextures[0].id = texWindmill;
+	windmillTextures[0].type = "texture_diffuse";
+
+
 	// ADDED — ground textures
 	std::vector<Texture> groundTextures;
 	groundTextures.push_back(Texture());
@@ -193,6 +208,8 @@ int main()
 	// Create Obj files - easier :)
 	// we can add here our textures :)
 	MeshLoaderObj loader;
+	Mesh windmill = loader.loadObj("assets/models/windmill/woodenwindmill.obj", windmillTextures);
+
 	//GLuint texCactus = loadBMP("assets/models/cactus/cactus_diffuse.bmp");
 
 	Mesh cactus = loader.loadObj("assets/models/cactus/Cactus_lowpoly.obj");
@@ -247,6 +264,7 @@ int main()
 		float distToPoster = glm::distance(camera.getCameraPosition(), posterPos);
 		bool nearPoster = distToPoster < 15.0f;
 
+		windmillRotation += 50.0f * deltaTime;
 
 		// ===== GUN PICKUP LOGIC =====
 		float distToGun = glm::distance(
@@ -356,15 +374,18 @@ int main()
 				glm::mat4 ProjectionMatrix = glm::perspective(90.0f, window.getWidth() * 1.0f / window.getHeight(), 0.1f, 10000.0f);
 				glm::mat4 ViewMatrix = glm::lookAt(camera.getCameraPosition(), camera.getCameraPosition() + camera.getCameraViewDirection(), camera.getCameraUp());
 
+				glm::mat4 ModelMatrix;
+				glm::mat4 MVP;
+
 				GLuint MatrixID = glGetUniformLocation(sunShader.getId(), "MVP");
 
 				
 
 				//Test for one Obj loading = light source
 
-				glm::mat4 ModelMatrix = glm::mat4(1.0);
+			    ModelMatrix = glm::mat4(1.0);
 				ModelMatrix = glm::translate(ModelMatrix, lightPos);
-				glm::mat4 MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
+			    MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
 				glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
 
 				sun.draw(sunShader);
@@ -441,10 +462,35 @@ int main()
 
 				saloon.draw(shader);
 
+				// ===== DRAW WINDMILL =====
+			    ModelMatrix = glm::mat4(1.0f);
+				ModelMatrix = glm::translate(ModelMatrix, windmillPos);
+				ModelMatrix = glm::scale(ModelMatrix, glm::vec3(0.07f)); 
+				ModelMatrix = glm::rotate(
+					ModelMatrix,
+					glm::radians(windmillRotation),
+					glm::vec3(0, 1, 0) // rotate around Y axis
+				);
+			
+				glUniform3f(
+					glGetUniformLocation(shader.getId(), "objectColor"),
+					0.78f, 0.52f, 0.30f
+				);
+
+                MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
+				glUniformMatrix4fv(MatrixID2, 1, GL_FALSE, &MVP[0][0]);
+				glUniformMatrix4fv(ModelMatrixID, 1, GL_FALSE, &ModelMatrix[0][0]);
+
+			
+
+				windmill.draw(shader);
+
+
 				// ===== DRAW GUN ON GROUND =====
 				if (!hasgun)
 				{
-					glm::mat4 ModelMatrix = glm::mat4(1.0f);
+				   
+					ModelMatrix = glm::mat4(1.0f);
 					ModelMatrix = glm::translate(ModelMatrix, gunWorldPos);
 					ModelMatrix = glm::scale(ModelMatrix, glm::vec3(1.2f));
 					ModelMatrix = glm::rotate(ModelMatrix, glm::radians(90.0f), glm::vec3(1, 0, 0));
@@ -526,7 +572,7 @@ int main()
 				// ===== DRAW BULLETS =====
 				for (auto& b : bullets)
 				{
-					glm::mat4 ModelMatrix = glm::mat4(1.0f);
+					ModelMatrix = glm::mat4(1.0f);
 					ModelMatrix = glm::translate(ModelMatrix, b.position);
 					ModelMatrix = glm::scale(ModelMatrix, glm::vec3(0.5f));
 
