@@ -28,10 +28,20 @@ float tumbleweedRotation = 0.0f; // degrees
 bool hasgun = false;
 glm::vec3 gunWorldPos = glm::vec3(-80.0f, -15.0f, -80.0f);
 
+bool hasCoin = false;
+
 int ammo = 7;
 
 glm::vec3 windmillPos = glm::vec3(320.0f, -20.0f, -120.0f); 
 float windmillRotation = 0.0f;
+
+glm::vec3 coinPos = glm::vec3(
+	windmillPos.x - 10.0f,  
+	-20.0f,                 // ground level
+	windmillPos.z
+);
+
+
 
 
 struct Bullet
@@ -209,6 +219,7 @@ int main()
 	// we can add here our textures :)
 	MeshLoaderObj loader;
 	Mesh windmill = loader.loadObj("assets/models/windmill/woodenwindmill.obj", windmillTextures);
+	Mesh coin = loader.loadObj("assets/models/coin/coin.obj");
 
 	//GLuint texCactus = loadBMP("assets/models/cactus/cactus_diffuse.bmp");
 
@@ -265,6 +276,25 @@ int main()
 		bool nearPoster = distToPoster < 15.0f;
 
 		windmillRotation += 50.0f * deltaTime;
+
+		// ===== COIN PICKUP =====
+		if (!hasCoin)
+		{
+			float distToCoin = glm::distance(
+				camera.getCameraPosition(),
+				glm::vec3(
+					windmillPos.x - 4.0f,
+					-19.8f,
+					windmillPos.z
+				)
+			);
+
+			if (distToCoin < 8.0f && window.isMousePressed(GLFW_MOUSE_BUTTON_LEFT))
+			{
+				hasCoin = true;
+			}
+		}
+
 
 		// ===== GUN PICKUP LOGIC =====
 		float distToGun = glm::distance(
@@ -484,6 +514,52 @@ int main()
 			
 
 				windmill.draw(shader);
+
+				// ===== DRAW COIN =====
+				if (!hasCoin)
+				{
+					ModelMatrix = glm::mat4(1.0f);
+
+					// on ground, in front of windmill
+					ModelMatrix = glm::translate(
+						ModelMatrix,
+						glm::vec3(
+							windmillPos.x - 3.0f,
+							-19.9f,          // ground level
+							windmillPos.z
+						)
+					);
+
+					// SMALL coin
+					ModelMatrix = glm::scale(ModelMatrix, glm::vec3(0.05f));
+
+					// stand upright
+					ModelMatrix = glm::rotate(
+						ModelMatrix,
+						glm::radians(90.0f),
+						glm::vec3(1, 0, 0)
+					);
+
+					MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
+					glUniformMatrix4fv(MatrixID2, 1, GL_FALSE, &MVP[0][0]);
+					glUniformMatrix4fv(ModelMatrixID, 1, GL_FALSE, &ModelMatrix[0][0]);
+
+					coin.draw(shader);
+				}
+
+
+
+				// gold color (works without texture)
+				glUniform3f(
+					glGetUniformLocation(shader.getId(), "objectColor"),
+					1.0f, 0.84f, 0.0f
+				);
+
+				MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
+				glUniformMatrix4fv(MatrixID2, 1, GL_FALSE, &MVP[0][0]);
+				glUniformMatrix4fv(ModelMatrixID, 1, GL_FALSE, &ModelMatrix[0][0]);
+
+				coin.draw(shader);
 
 
 				// ===== DRAW GUN ON GROUND =====
