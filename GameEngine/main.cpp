@@ -25,6 +25,10 @@ glm::vec3 tumbleweedPos = glm::vec3(-300.0f, -19.0f, -250.0f);// start left side
 float tumbleweedSpeed = 20.0f; // units per second
 float tumbleweedRotation = 0.0f; // degrees
 
+bool hasgun = false;
+glm::vec3 gunWorldPos = glm::vec3(-80.0f, -15.0f, -80.0f);
+
+
 glm::vec3 posterPos = glm::vec3(0.0f, -5.0f, -78.0f);
 
 
@@ -38,6 +42,8 @@ std::vector<glm::vec3> cactusPositions = {
 
 glm::vec3 airplanePos = glm::vec3(0.0f, 200.0f, -300.0f);
 float airplaneAngle = 0.0f;
+
+
 //Mesh tumbleweed = loader.loadObj("Resources/Models/sphere.obj", textures2); 
 // textures2 = rock texture, or use a custom tumbleweed texture
 float timeOfDay = 0.0f; // increases every frame 
@@ -178,6 +184,8 @@ int main()
 	//GLuint texCactus = loadBMP("assets/models/cactus/cactus_diffuse.bmp");
 
 	Mesh cactus = loader.loadObj("assets/models/cactus/Cactus_lowpoly.obj");
+	Mesh gun = loader.loadObj("assets/models/gun/GUN.obj");
+
 
 
 	Mesh sun = loader.loadObj("Resources/Models/sphere.obj");
@@ -227,6 +235,24 @@ int main()
 		float distToPoster = glm::distance(camera.getCameraPosition(), posterPos);
 		bool nearPoster = distToPoster < 15.0f;
 
+
+		// ===== GUN PICKUP LOGIC =====
+		float distToGun = glm::distance(
+			camera.getCameraPosition(),
+			gunWorldPos
+		);
+
+		if (!hasgun && distToGun < 10.0f)
+		{
+			if (window.isPressed(GLFW_KEY_E))
+			{
+				hasgun = true;
+				// snap camera slightly back to avoid visual jump
+				glm::vec3 camPos = camera.getCameraPosition();
+				camPos.y = -15.0f;
+				camera.setCameraPosition(camPos);
+			}
+		}
 	
 // UPDATE DAY–NIGHT CYCLE
 
@@ -375,6 +401,23 @@ int main()
 
 				saloon.draw(shader);
 
+				// ===== DRAW GUN ON GROUND =====
+				if (!hasgun)
+				{
+					glm::mat4 ModelMatrix = glm::mat4(1.0f);
+					ModelMatrix = glm::translate(ModelMatrix, gunWorldPos);
+					ModelMatrix = glm::scale(ModelMatrix, glm::vec3(1.2f));
+					ModelMatrix = glm::rotate(ModelMatrix, glm::radians(90.0f), glm::vec3(1, 0, 0));
+
+					glm::mat4 MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
+
+					glUniformMatrix4fv(MatrixID2, 1, GL_FALSE, &MVP[0][0]);
+					glUniformMatrix4fv(ModelMatrixID, 1, GL_FALSE, &ModelMatrix[0][0]);
+
+					gun.draw(shader);
+				}
+
+
 				// ===== draw wanted poster =====
 				ModelMatrix = glm::mat4(1.0f);
 
@@ -460,6 +503,34 @@ int main()
 
 				ImGui::Begin("Wild West Controls");
 
+				// ===== DRAW GUN IN HAND =====
+				if (hasgun)
+				{
+					glm::vec3 camPos = camera.getCameraPosition();
+					glm::vec3 camDir = camera.getCameraViewDirection();
+					glm::vec3 camRight = glm::normalize(glm::cross(camDir, camera.getCameraUp()));
+					glm::vec3 camUp = camera.getCameraUp();
+
+					glm::vec3 gunPos =
+						camPos +
+						camDir * 5.0f +
+						camRight * 2.0f -
+						camUp * 1.5f;
+
+					glm::mat4 ModelMatrix = glm::mat4(1.0f);
+					ModelMatrix = glm::translate(ModelMatrix, gunPos);
+					ModelMatrix = glm::scale(ModelMatrix, glm::vec3(0.6f));
+					ModelMatrix = glm::rotate(ModelMatrix, glm::radians(-90.0f), glm::vec3(0, 1, 0));
+
+					glm::mat4 MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
+
+					glUniformMatrix4fv(MatrixID2, 1, GL_FALSE, &MVP[0][0]);
+					glUniformMatrix4fv(ModelMatrixID, 1, GL_FALSE, &ModelMatrix[0][0]);
+
+					gun.draw(shader);
+				}
+
+
 				static bool skyBlue = true;
 
 				if (ImGui::Button("Toggle Sky Color"))
@@ -520,6 +591,7 @@ int main()
 void processKeyboardInput()
 {
 	float cameraSpeed = 30.0f * deltaTime;
+
 	
 if (window.isPressed(GLFW_KEY_W))
 		camera.keyboardMoveFront(cameraSpeed);
@@ -562,6 +634,8 @@ if (window.isPressed(GLFW_KEY_S))
 		camera.setCameraPosition(camPos);
 	}
 	camera.setCameraPosition(glm::vec3(camera.getCameraPosition().x, -15.0f, camera.getCameraPosition().z));
+
+
 
 }
 		
