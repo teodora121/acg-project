@@ -76,11 +76,12 @@ const char* taskTexts[] = {
 
 
 std::vector<glm::vec3> cactusPositions = {
-	glm::vec3(120.0f, -5.0f, -150.0f),
-	glm::vec3(0.0f,   -5.0f, -50.0f),
-	glm::vec3(200.0f, -5.0f, -250.0f),
-	glm::vec3(-150.0f,-5.0f, -300.0f)
+	glm::vec3(100.0f, -20.0f, -200.0f),
+	glm::vec3(-120.0f, -20.0f, -250.0f),
+	glm::vec3(180.0f, -20.0f, -300.0f),
+	glm::vec3(-200.0f, -20.0f, -350.0f)
 };
+
 
 
 glm::vec3 airplanePos = glm::vec3(0.0f, 200.0f, -300.0f);
@@ -94,6 +95,48 @@ float daySpeed = 0.2f; // how fast the cycle runs
 float getTerrainHeight(float x, float z) { 
 	return -20.0f;
 }
+
+Mesh createCylinder(float radius, float height, int segments)
+{
+	std::vector<Vertex> vertices;
+	std::vector<int> indices;
+
+	for (int i = 0; i <= segments; i++)
+	{
+		float angle = (float)i / segments * 2.0f * 3.14159f;
+		float x = cos(angle) * radius;
+		float z = sin(angle) * radius;
+
+		// bottom vertex
+		Vertex v1;
+		v1.pos = glm::vec3(x, 0.0f, z);
+		v1.normals = glm::normalize(glm::vec3(x, 0.0f, z));
+		v1.textureCoords = glm::vec2((float)i / segments, 0.0f);
+		vertices.push_back(v1);
+
+		// top vertex
+		Vertex v2;
+		v2.pos = glm::vec3(x, height, z);
+		v2.normals = glm::normalize(glm::vec3(x, 0.0f, z));
+		v2.textureCoords = glm::vec2((float)i / segments, 1.0f);
+		vertices.push_back(v2);
+	}
+
+	for (int i = 0; i < segments * 2; i += 2)
+	{
+		indices.push_back(i);
+		indices.push_back(i + 1);
+		indices.push_back(i + 2);
+
+		indices.push_back(i + 1);
+		indices.push_back(i + 3);
+		indices.push_back(i + 2);
+	}
+
+	std::vector<Texture> emptyTextures;
+	return Mesh(vertices, indices, emptyTextures);
+}
+
 
 int main()
 {
@@ -271,6 +314,11 @@ int main()
 
 	// ADDED — saloon model
 	Mesh saloon = loader.loadObj("Resources/Models/saloon.obj", saloonTextures);
+
+	// add cactus mesh
+	Mesh cactusBody = createCylinder(5.0f, 30.0f, 20);
+	Mesh cactusArm = createCylinder(3.0f, 20.0f, 20);
+
 
 	//check if we close the window or press the escape button
 	while (!window.isPressed(GLFW_KEY_ESCAPE) &&
@@ -708,17 +756,45 @@ int main()
 				// added - draw cacti
 				for (auto& pos : cactusPositions)
 				{
+					float cactusBaseOffset = -15.0f; // half the cactus height
+
+					glm::vec3 adjustedPos = pos + glm::vec3(0.0f, cactusBaseOffset, 0.0f);
+
+					// MAIN BODY
 					glm::mat4 ModelMatrix = glm::mat4(1.0f);
-					ModelMatrix = glm::translate(ModelMatrix, pos);
-					ModelMatrix = glm::scale(ModelMatrix, glm::vec3(100.0f)); // adjust cactus size
+					ModelMatrix = glm::translate(ModelMatrix, adjustedPos);
+					ModelMatrix = glm::scale(ModelMatrix, glm::vec3(1.0f));
 
 					glm::mat4 MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
-
 					glUniformMatrix4fv(MatrixID2, 1, GL_FALSE, &MVP[0][0]);
 					glUniformMatrix4fv(ModelMatrixID, 1, GL_FALSE, &ModelMatrix[0][0]);
 
-					cactus.draw(shader);
+					cactusBody.draw(shader);
+
+					// LEFT ARM
+					glm::mat4 armL = glm::mat4(1.0f);
+					armL = glm::translate(armL, adjustedPos + glm::vec3(-5.0f, 15.0f, 0.0f));
+					armL = glm::rotate(armL, glm::radians(90.0f), glm::vec3(0, 0, 1));
+
+					MVP = ProjectionMatrix * ViewMatrix * armL;
+					glUniformMatrix4fv(MatrixID2, 1, GL_FALSE, &MVP[0][0]);
+					glUniformMatrix4fv(ModelMatrixID, 1, GL_FALSE, &armL[0][0]);
+
+					cactusArm.draw(shader);
+
+					// RIGHT ARM
+					glm::mat4 armR = glm::mat4(1.0f);
+					armR = glm::translate(armR, adjustedPos + glm::vec3(5.0f, 15.0f, 0.0f));
+					armR = glm::rotate(armR, glm::radians(-90.0f), glm::vec3(0, 0, 1));
+
+					MVP = ProjectionMatrix * ViewMatrix * armR;
+					glUniformMatrix4fv(MatrixID2, 1, GL_FALSE, &MVP[0][0]);
+					glUniformMatrix4fv(ModelMatrixID, 1, GL_FALSE, &armR[0][0]);
+
+					cactusArm.draw(shader);
 				}
+
+
 
 			
 // GUI WINDOW
