@@ -30,7 +30,12 @@ glm::vec3 gunWorldPos = glm::vec3(-80.0f, -15.0f, -80.0f);
 
 bool hasCoin = false;
 
-int ammo = 7;
+int ammo = 0;
+// ===== AMMO BUILDING TASK (TASK 3) =====
+glm::vec3 ammoBuildingPos = glm::vec3(-170.0f, -20.0f, -80.0f);
+float ammoBuildingRadius = 25.0f;
+bool ammoCollected = false;
+
 
 glm::vec3 windmillPos = glm::vec3(320.0f, -20.0f, -120.0f); 
 float windmillRotation = 0.0f;
@@ -63,7 +68,8 @@ int currentTask = 0;
 
 const char* taskTexts[] = {
 	"Task 1: Read the bounty poster (Press R)",
-	"Task 2: Pick up the revolver (Press E)"
+	"Task 2: Pick up the revolver (Press E)",
+	"Task 3: Enter the supply building and press G to load ammo"
 };
 
 
@@ -333,6 +339,24 @@ int main()
 				camera.setCameraPosition(camPos);
 			}
 		}
+		// ===== TASK 3: ENTER BUILDING AND LOAD AMMO =====
+		float distToAmmoBuilding = glm::distance(
+			camera.getCameraPosition(),
+			ammoBuildingPos
+		);
+
+		bool insideAmmoBuilding = distToAmmoBuilding < ammoBuildingRadius;
+
+		if (currentTask == 2 && insideAmmoBuilding && !ammoCollected)
+		{
+			if (window.isPressed(GLFW_KEY_G))
+			{
+				ammo = 7;                 // refill ammo
+				ammoCollected = true;     // prevent reloading forever
+				currentTask = 3;          // move to next task
+			}
+		}
+
 
 
 		// ===== SHOOT BULLET =====
@@ -704,6 +728,12 @@ int main()
 				ImGui::Text("Current Objective:");
 				ImGui::Text("%s", taskTexts[currentTask]);
 				ImGui::Separator();
+				// ===== TASK 3 GUI PROMPT =====
+				if (currentTask == 2 && insideAmmoBuilding && !ammoCollected)
+				{
+					ImGui::Text("Press G to load ammo");
+				}
+
 
 
 				// ===== DRAW GUN IN HAND =====

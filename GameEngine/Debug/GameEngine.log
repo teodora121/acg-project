@@ -1,4 +1,4 @@
 ﻿  main.cpp
-C:\Users\monic\Documents\GitHub\acg-project\GameEngine\main.cpp(281,22): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-C:\Users\monic\Documents\GitHub\acg-project\GameEngine\main.cpp(353,21): warning C4018: '<': signed/unsigned mismatch
+C:\Users\monic\Documents\GitHub\acg-project\GameEngine\main.cpp(287,22): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\monic\Documents\GitHub\acg-project\GameEngine\main.cpp(377,21): warning C4018: '<': signed/unsigned mismatch
   GameEngine.vcxproj -> C:\Users\monic\Documents\GitHub\acg-project\Debug\GameEngine.exe
