@@ -18,15 +18,20 @@ float lastFrame = 0.0f;
 Window window("Game Engine", 800, 800);
 Camera camera;
 
-
-
-
 glm::vec3 lightColor = glm::vec3(1.0f);
 glm::vec3 lightPos = glm::vec3(-180.0f, 100.0f, -200.0f);
 
 glm::vec3 tumbleweedPos = glm::vec3(-300.0f, -19.0f, -250.0f);// start left side
 float tumbleweedSpeed = 20.0f; // units per second
 float tumbleweedRotation = 0.0f; // degrees
+
+std::vector<glm::vec3> cactusPositions = {
+	glm::vec3(120.0f, -15.0f, -150.0f),
+	glm::vec3(0.0f, -20.0f, -50.0f),
+	glm::vec3(200.0f, -20.0f, -250.0f),
+	glm::vec3(-150.0f, -20.0f, -300.0f)
+};
+
 glm::vec3 airplanePos = glm::vec3(0.0f, 200.0f, -300.0f);
 float airplaneAngle = 0.0f;
 //Mesh tumbleweed = loader.loadObj("Resources/Models/sphere.obj", textures2); 
@@ -50,6 +55,8 @@ int main()
 	GLuint tex2 = loadBMP("Resources/Textures/rock.bmp");
 	GLuint tex3 = loadBMP("Resources/Textures/orange.bmp");
 	GLuint texairplane = loadBMP("Resources/Textures/moonnou.bmp");
+
+
 	// ADDED — ground texture
 	GLuint texGround = loadBMP("Resources/Textures/ground.bmp");
 	glBindTexture(GL_TEXTURE_2D, texGround);
@@ -65,6 +72,9 @@ int main()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+
+
 
 	// ADDED — saloon texture
 	GLuint texSaloon = loadBMP("Resources/Textures/saloon_defuse.bmp");
@@ -152,6 +162,11 @@ int main()
 	// Create Obj files - easier :)
 	// we can add here our textures :)
 	MeshLoaderObj loader;
+	//GLuint texCactus = loadBMP("assets/models/cactus/cactus_diffuse.bmp");
+
+	Mesh cactus = loader.loadObj("assets/models/cactus/Cactus_lowpoly.obj");
+
+
 	Mesh sun = loader.loadObj("Resources/Models/sphere.obj");
 	Mesh airplane = loader.loadObj("Resources/Models/airplane.obj", airplaneTextures);
 	Mesh tumbleweed = loader.loadObj("Resources/Models/sphere.obj", textures2);
@@ -382,6 +397,22 @@ int main()
 				glUniformMatrix4fv(ModelMatrixID, 1, GL_FALSE, &ModelMatrix[0][0]);
 
 				tumbleweed.draw(shader);
+
+				// added - draw cacti
+				for (auto& pos : cactusPositions)
+				{
+					glm::mat4 ModelMatrix = glm::mat4(1.0f);
+					ModelMatrix = glm::translate(ModelMatrix, pos);
+					ModelMatrix = glm::scale(ModelMatrix, glm::vec3(5.0f)); // adjust cactus size
+
+					glm::mat4 MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
+
+					glUniformMatrix4fv(MatrixID2, 1, GL_FALSE, &MVP[0][0]);
+					glUniformMatrix4fv(ModelMatrixID, 1, GL_FALSE, &ModelMatrix[0][0]);
+
+					cactus.draw(shader);
+				}
+
 			
 // GUI WINDOW
 
