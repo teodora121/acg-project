@@ -55,7 +55,18 @@ std::vector<Bullet> bullets;
 
 
 
-glm::vec3 posterPos = glm::vec3(0.0f, -5.0f, -78.0f);
+glm::vec3 posterPos = glm::vec3(-67.0f, -10.0f, -79.5f);
+
+bool posterRead = false;
+// ===== TASK SYSTEM =====
+int currentTask = 0;
+
+const char* taskTexts[] = {
+	"Task 1: Read the bounty poster (Press R)",
+	"Task 2: Pick up the revolver (Press E)"
+};
+
+
 
 
 std::vector<glm::vec3> cactusPositions = {
@@ -274,6 +285,14 @@ int main()
 		processKeyboardInput();
 		float distToPoster = glm::distance(camera.getCameraPosition(), posterPos);
 		bool nearPoster = distToPoster < 15.0f;
+		// mark poster as read when player presses R while near it
+		if (nearPoster && window.isPressed(GLFW_KEY_R) && currentTask == 0)
+		{
+			posterRead = true;
+			currentTask = 1; // move to next task
+		}
+
+
 
 		windmillRotation += 50.0f * deltaTime;
 
@@ -302,17 +321,19 @@ int main()
 			gunWorldPos
 		);
 
-		if (!hasgun && distToGun < 10.0f)
+		if (!hasgun && distToGun < 10.0f && currentTask == 1)
 		{
 			if (window.isPressed(GLFW_KEY_E))
 			{
 				hasgun = true;
-				// snap camera slightly back to avoid visual jump
+				currentTask = 2; // task 2 complete
+
 				glm::vec3 camPos = camera.getCameraPosition();
 				camPos.y = -15.0f;
 				camera.setCameraPosition(camPos);
 			}
 		}
+
 
 		// ===== SHOOT BULLET =====
 		if (hasgun && ammo > 0 && window.isMousePressed(GLFW_MOUSE_BUTTON_LEFT))
@@ -679,6 +700,11 @@ int main()
 // GUI WINDOW
 
 				ImGui::Begin("Wild West Controls");
+				ImGui::Separator();
+				ImGui::Text("Current Objective:");
+				ImGui::Text("%s", taskTexts[currentTask]);
+				ImGui::Separator();
+
 
 				// ===== DRAW GUN IN HAND =====
 				if (hasgun)
@@ -723,22 +749,12 @@ int main()
 				ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
 				ImGui::Text("Ammo: %d / 7", ammo);
 
-				if (nearPoster)
+				if (currentTask == 0 && nearPoster)
 				{
 					ImGui::Text("Press R to read the poster");
-
-					if (window.isPressed(GLFW_KEY_R))
-					{
-						ImGui::OpenPopup("PosterPopup");
-					}
 				}
 
-				if (ImGui::BeginPopup("PosterPopup"))
-				{
-					ImGui::Text("WANTED: Dead or Alive!");
-					ImGui::Text("Reward: $5000");
-					ImGui::EndPopup();
-				}
+
 
 
 
