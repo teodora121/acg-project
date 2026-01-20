@@ -26,11 +26,12 @@ float tumbleweedSpeed = 20.0f; // units per second
 float tumbleweedRotation = 0.0f; // degrees
 
 std::vector<glm::vec3> cactusPositions = {
-	glm::vec3(120.0f, -15.0f, -150.0f),
-	glm::vec3(0.0f, -20.0f, -50.0f),
-	glm::vec3(200.0f, -20.0f, -250.0f),
-	glm::vec3(-150.0f, -20.0f, -300.0f)
+	glm::vec3(120.0f, -5.0f, -150.0f),
+	glm::vec3(0.0f,   -5.0f, -50.0f),
+	glm::vec3(200.0f, -5.0f, -250.0f),
+	glm::vec3(-150.0f,-5.0f, -300.0f)
 };
+
 
 glm::vec3 airplanePos = glm::vec3(0.0f, 200.0f, -300.0f);
 float airplaneAngle = 0.0f;
@@ -403,7 +404,7 @@ int main()
 				{
 					glm::mat4 ModelMatrix = glm::mat4(1.0f);
 					ModelMatrix = glm::translate(ModelMatrix, pos);
-					ModelMatrix = glm::scale(ModelMatrix, glm::vec3(5.0f)); // adjust cactus size
+					ModelMatrix = glm::scale(ModelMatrix, glm::vec3(100.0f)); // adjust cactus size
 
 					glm::mat4 MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
 
