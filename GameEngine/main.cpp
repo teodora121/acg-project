@@ -69,7 +69,8 @@ int currentTask = 0;
 const char* taskTexts[] = {
 	"Task 1: Read the bounty poster (Press R)",
 	"Task 2: Pick up the revolver (Press E)",
-	"Task 3: Enter the supply building and press G to load ammo"
+	"Task 3: Enter the supply building and press G to load ammo",
+	 "Task 4: Collect the coin (Press P)"
 };
 
 
@@ -350,24 +351,20 @@ int main()
 
 		windmillRotation += 50.0f * deltaTime;
 
-		// ===== COIN PICKUP =====
-		if (!hasCoin)
+		//  COIN PICKUP 
+		if (!hasCoin && currentTask == 3) // only after ammo task
 		{
 			float distToCoin = glm::distance(
 				camera.getCameraPosition(),
-				glm::vec3(
-					windmillPos.x - 4.0f,
-					-19.8f,
-					windmillPos.z
-				)
+				glm::vec3(windmillPos.x, -19.0f, windmillPos.z - 20.0f)
 			);
 
-			if (distToCoin < 8.0f && window.isMousePressed(GLFW_MOUSE_BUTTON_LEFT))
+			if (distToCoin < 8.0f && window.isPressed(GLFW_KEY_P))
 			{
 				hasCoin = true;
+				currentTask = 4; // task 4 complete
 			}
 		}
-
 
 		// ===== GUN PICKUP LOGIC =====
 		float distToGun = glm::distance(
@@ -613,18 +610,18 @@ int main()
 				{
 					ModelMatrix = glm::mat4(1.0f);
 
-					// on ground, in front of windmill
+					
 					ModelMatrix = glm::translate(
 						ModelMatrix,
 						glm::vec3(
-							windmillPos.x - 3.0f,
-							-19.9f,          // ground level
-							windmillPos.z
+							windmillPos.x,      
+							-19.0f,            
+							windmillPos.z - 20.0f  
 						)
 					);
 
-					// SMALL coin
-					ModelMatrix = glm::scale(ModelMatrix, glm::vec3(0.05f));
+					
+					ModelMatrix = glm::scale(ModelMatrix, glm::vec3(0.3f));
 
 					// stand upright
 					ModelMatrix = glm::rotate(
@@ -637,23 +634,12 @@ int main()
 					glUniformMatrix4fv(MatrixID2, 1, GL_FALSE, &MVP[0][0]);
 					glUniformMatrix4fv(ModelMatrixID, 1, GL_FALSE, &ModelMatrix[0][0]);
 
+					// gold color
+					glUniform3f(glGetUniformLocation(shader.getId(), "objectColor"), 1.0f, 0.84f, 0.0f);
+
 					coin.draw(shader);
 				}
-
-
-
-				// gold color (works without texture)
-				glUniform3f(
-					glGetUniformLocation(shader.getId(), "objectColor"),
-					1.0f, 0.84f, 0.0f
-				);
-
-				MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
-				glUniformMatrix4fv(MatrixID2, 1, GL_FALSE, &MVP[0][0]);
-				glUniformMatrix4fv(ModelMatrixID, 1, GL_FALSE, &ModelMatrix[0][0]);
-
-				coin.draw(shader);
-
+				
 
 				// ===== DRAW GUN ON GROUND =====
 				if (!hasgun)
@@ -802,7 +788,7 @@ int main()
 				ImGui::Begin("Wild West Controls");
 				ImGui::Separator();
 				ImGui::Text("Current Objective:");
-				if (currentTask < 3)
+				if (currentTask < 4)
 					ImGui::Text("%s", taskTexts[currentTask]);
 				else
 					ImGui::Text("All tasks complete!");
@@ -813,8 +799,15 @@ int main()
 				{
 					ImGui::Text("Press G to load ammo");
 				}
-
-
+				//  TASK 4 GUI PROMPT 
+				if (currentTask == 3 && !hasCoin)
+				{
+					float distToCoin = glm::distance(camera.getCameraPosition(), coinPos);
+					if (distToCoin < 8.0f)
+					{
+						ImGui::Text("Press P to collect the coin");
+					}
+				}
 
 				// ===== DRAW GUN IN HAND =====
 				if (hasgun)
