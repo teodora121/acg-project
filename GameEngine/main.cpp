@@ -38,6 +38,9 @@ bool ammoCollected = false;
 
 
 glm::vec3 windmillPos = glm::vec3(320.0f, -20.0f, -120.0f); 
+glm::vec3 horsePos = glm::vec3(80.0f, -15.0f, -80.0f);
+
+
 float windmillRotation = 0.0f;
 
 glm::vec3 coinPos = glm::vec3(
@@ -286,6 +289,8 @@ int main()
 
 	Mesh cactus = loader.loadObj("assets/models/cactus/Cactus_lowpoly.obj");
 	Mesh gun = loader.loadObj("assets/models/gun/GUN.obj");
+	Mesh horse = loader.loadObj("assets/models/horse/horse.obj");
+
 
 
 
@@ -581,6 +586,37 @@ int main()
 				glUniformMatrix4fv(ModelMatrixID, 1, GL_FALSE, &ModelMatrix[0][0]);
 
 				saloon.draw(shader);
+				// ===== DRAW HORSE =====
+// compute ground height at horse X/Z so it sits on the terrain
+				float horseGroundY = getTerrainHeight(horsePos.x, horsePos.z);
+
+				// tweak this offset until the horse's feet touch the ground visually
+				// try 0.0f, 3.0f, 5.0f — default 5.0f works for many models
+				float horseVerticalOffset = 5.0f;
+
+				// build draw position from horse X/Z and computed ground Y
+				glm::vec3 horseDrawPos = glm::vec3(horsePos.x, horseGroundY + horseVerticalOffset, horsePos.z);
+
+				ModelMatrix = glm::mat4(1.0f);
+				ModelMatrix = glm::translate(ModelMatrix, horseDrawPos);
+
+				// realistic horse size (OBJ files are often huge)
+				ModelMatrix = glm::scale(ModelMatrix, glm::vec3(0.20f));
+
+				// face toward the street
+				ModelMatrix = glm::rotate(
+					ModelMatrix,
+					glm::radians(180.0f),
+					glm::vec3(0, 1, 0)
+				);
+
+				MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
+				glUniformMatrix4fv(MatrixID2, 1, GL_FALSE, &MVP[0][0]);
+				glUniformMatrix4fv(ModelMatrixID, 1, GL_FALSE, &ModelMatrix[0][0]);
+
+				horse.draw(shader);
+
+
 
 				// ===== DRAW WINDMILL =====
 			    ModelMatrix = glm::mat4(1.0f);
