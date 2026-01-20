@@ -379,13 +379,13 @@ int main()
 				ModelMatrix = glm::mat4(1.0f);
 
 				// Position on wall
-				ModelMatrix = glm::translate(ModelMatrix, glm::vec3(0.0f, -5.0f, -78.5f));
+				ModelMatrix = glm::translate(ModelMatrix, glm::vec3(-67.0f, -10.0f, -79.5f));
 
 				// Make it small
-				ModelMatrix = glm::scale(ModelMatrix, glm::vec3(3.0f, 4.0f, 1.0f));
+				ModelMatrix = glm::scale(ModelMatrix, glm::vec3(0.05f, 0.05f, 0.05f));
 
 				// FIX: rotate plane upright
-				ModelMatrix = glm::rotate(ModelMatrix, glm::radians(-90.0f), glm::vec3(1, 0, 0));
+				ModelMatrix = glm::rotate(ModelMatrix, glm::radians(5000.0f), glm::vec3(0, 0, 1));
 
 				// Face camera
 				ModelMatrix = glm::rotate(ModelMatrix, glm::radians(180.0f), glm::vec3(0, 1, 0));
