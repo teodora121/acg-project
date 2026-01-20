@@ -7,7 +7,7 @@
 #include "Model Loading\mesh.h"
 #include "Model Loading\texture.h"
 #include "Model Loading\meshLoaderObj.h"
-#include "SceneObjects.h"
+
 
 
 void processKeyboardInput();
@@ -344,17 +344,26 @@ int main()
 
 				// ===== draw building 1 =====
 				ModelMatrix = glm::mat4(1.0f);
-				ModelMatrix = glm::translate(ModelMatrix, glm::vec3(80.0f, -20.0f, -100.0f));
-				ModelMatrix = glm::scale(ModelMatrix, glm::vec3(8.0f));
+				ModelMatrix = glm::translate(
+					ModelMatrix,
+					glm::vec3(170.0f, -20.0f, -80.0f) // right side
+				);
+				ModelMatrix = glm::scale(ModelMatrix, glm::vec3(0.8f));
+
 				MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
 				glUniformMatrix4fv(MatrixID2, 1, GL_FALSE, &MVP[0][0]);
 				glUniformMatrix4fv(ModelMatrixID, 1, GL_FALSE, &ModelMatrix[0][0]);
 				building1.draw(shader);
 
+
 				// ===== draw building 2 =====
 				ModelMatrix = glm::mat4(1.0f);
-				ModelMatrix = glm::translate(ModelMatrix, glm::vec3(-100.0f, -20.0f, -120.0f));
-				ModelMatrix = glm::scale(ModelMatrix, glm::vec3(10.0f));
+				ModelMatrix = glm::translate(
+					ModelMatrix,
+					glm::vec3(-170.0f, -20.0f, -80.0f) // left side
+				);
+				ModelMatrix = glm::scale(ModelMatrix, glm::vec3(0.7f));
+
 				MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
 				glUniformMatrix4fv(MatrixID2, 1, GL_FALSE, &MVP[0][0]);
 				glUniformMatrix4fv(ModelMatrixID, 1, GL_FALSE, &ModelMatrix[0][0]);
@@ -420,19 +429,19 @@ int main()
 void processKeyboardInput()
 {
 	float cameraSpeed = 30.0f * deltaTime;
-
-	if (window.isPressed(GLFW_KEY_W))
+	
+if (window.isPressed(GLFW_KEY_W))
 		camera.keyboardMoveFront(cameraSpeed);
-	if (window.isPressed(GLFW_KEY_S))
+if (window.isPressed(GLFW_KEY_S))
 		camera.keyboardMoveBack(cameraSpeed);
 	if (window.isPressed(GLFW_KEY_A))
-		camera.keyboardMoveLeft(cameraSpeed);
+	camera.keyboardMoveLeft(cameraSpeed);
 	if (window.isPressed(GLFW_KEY_D))
 		camera.keyboardMoveRight(cameraSpeed);
-	if (window.isPressed(GLFW_KEY_R))
-		camera.keyboardMoveUp(cameraSpeed);
-	if (window.isPressed(GLFW_KEY_F))
-		camera.keyboardMoveDown(cameraSpeed);
+	//if (window.isPressed(GLFW_KEY_R))
+	//	camera.keyboardMoveUp(cameraSpeed);
+	//if (window.isPressed(GLFW_KEY_F))
+	//	camera.keyboardMoveDown(cameraSpeed);
 
 
 	if (window.isPressed(GLFW_KEY_LEFT))
@@ -446,6 +455,23 @@ void processKeyboardInput()
 
 	if (window.isPressed(GLFW_KEY_DOWN))
 		camera.rotateOx(-cameraSpeed);
+	// ===== LOCK CAMERA TO GROUND://///oof =====
+
+// get current camera position
+	glm::vec3 camPos = camera.getCameraPosition();
+
+	// ground and eye height
+	float groundY = -20.0f;   // same Y as your ground
+	float eyeHeight = 5.0f;   // camera height above ground
+
+	// prevent falling below ground
+	if (camPos.y < groundY + eyeHeight)
+	{
+		camPos.y = groundY + eyeHeight;
+		camera.setCameraPosition(camPos);
+	}
+	camera.setCameraPosition(glm::vec3(camera.getCameraPosition().x, -15.0f, camera.getCameraPosition().z));
+
 }
 		
 
